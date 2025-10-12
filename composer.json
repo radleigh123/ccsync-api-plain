@@ -1,0 +1,6 @@
+{
+    "require": {
+        "php": ">=7.0",
+        "kreait/firebase-php": "7.22.0"
+    }
+}
