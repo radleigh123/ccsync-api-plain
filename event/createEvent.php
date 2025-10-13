@@ -29,7 +29,7 @@ try {
     $registration_start = $data['registration_start'] ?? '';
     $registration_end = $data['registration_end'] ?? '';
     $max_participants = $data['max_participants'] ?? null;
-    $status = $data['status'] ?? 'upcoming';
+    $status = $data['status'] ?? 'open';
 
     if (empty($name) || empty($event_date) || empty($time_from) || empty($time_to)) {
         http_response_code(400);
