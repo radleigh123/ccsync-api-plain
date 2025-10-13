@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
-    $stmt = $conn->prepare("SELECT m.*, p.name AS program_name FROM members m LEFT JOIN programs p ON m.program = p.code");
+    $stmt = $conn->prepare("SELECT m.*, p.name AS program_name FROM members m LEFT JOIN programs p ON m.program COLLATE utf8mb4_unicode_ci = p.code COLLATE utf8mb4_unicode_ci");
     $stmt->execute();
     $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
