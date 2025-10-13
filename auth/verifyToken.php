@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$factory = (new Factory)->withServiceAccount(__DIR__ . '/../config/firebase/firebase_credentials.json');
+$firebaseSecret = getenv('FIREBASE_SECRET');
+$factory = (new Factory)->withServiceAccount($firebaseSecret);
 $auth = $factory->createAuth();
 
 $data = json_decode(file_get_contents("php://input"), true);
