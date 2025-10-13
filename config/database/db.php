@@ -1,12 +1,17 @@
 <?php
 
-$server = "127.0.0.1";
-$username = "root";
-$password = "";
-$database = "ccsync_api";
+// $server = "127.0.0.1";
+// $username = "root";
+// $password = "";
+// $database = "ccsync_api";
+$server = "db.fr-pari1.bengt.wasmernet.com";
+$port = 10272;
+$username = "d3c8ccd17be68000cffc637f009d";
+$password = "068ed3c8-ccd1-7da7-8000-6cc3cd656ec2";
+$database = "ccsync_db";
 
 try {
-    $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
+    $conn = new PDO("mysql:host=$server;port=$port;dbname=$database", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     error_log("Database connected successfully");
