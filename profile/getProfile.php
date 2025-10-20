@@ -49,6 +49,7 @@ try {
             'id_profile' => $userProfile['id'],
             'first_name' => $userProfile['first_name'],
             'last_name' => $userProfile['last_name'],
+            'display_name' => $userProfile['display_name'],
             'email' => $userProfile['user_email'],
             'id_school_number' => $userProfile['user_id_school_number'],
             'phone_number' => $userProfile['phone_number'],
