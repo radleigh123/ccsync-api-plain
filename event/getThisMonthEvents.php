@@ -1,10 +1,11 @@
 <?php
 
 require_once __DIR__ . '/../config/database/db.php';
-// require __DIR__ . '/../vendor/autoload.php';  // Not needed - using native PHP/PDO only
 
 /**
- * Fetch all events
+ * Fetch events for the current month
+ * 
+ * Returns only events where event_date falls within the current month and year
  */
 
 header("Content-Type: application/json");
@@ -19,15 +20,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
-    $stmt = $conn->prepare("SELECT * FROM events");
+    // Get current month and year
+    $currentMonth = date('m');
+    $currentYear = date('Y');
+    
+    // Build the query to get events for the current month
+    $stmt = $conn->prepare("
+        SELECT * FROM events
+        WHERE YEAR(event_date) = :year
+        AND MONTH(event_date) = :month
+        ORDER BY event_date ASC
+    ");
+    
+    $stmt->bindValue(':year', $currentYear, PDO::PARAM_INT);
+    $stmt->bindValue(':month', $currentMonth, PDO::PARAM_INT);
     $stmt->execute();
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     http_response_code(200);
     echo json_encode([
         "success" => true,
-        "message" => "Events fetched successfully",
-        "events" => $events
+        "message" => "This month's events fetched successfully",
+        "events" => $events,
+        "month" => intval($currentMonth),
+        "year" => intval($currentYear),
+        "count" => count($events)
     ]);
 } catch (PDOException $e) {
     error_log("Query failed: " . $e->getMessage());
@@ -50,3 +67,4 @@ try {
 } finally {
     $conn = null;
 }
+?>

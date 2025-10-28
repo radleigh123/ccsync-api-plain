@@ -937,6 +937,88 @@ ALTER TABLE `event_registrations`
   ADD CONSTRAINT `event_registrations_event_id_foreign` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `event_registrations_member_id_foreign` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`) ON DELETE CASCADE;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `requirements`
+--
+
+CREATE TABLE `requirements` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('open','closed','archived') NOT NULL DEFAULT 'open',
+  `requirement_date` date NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `requirements`
+--
+
+INSERT INTO `requirements` (`name`, `description`, `status`, `requirement_date`) VALUES
+(1, 'Good Moral Certificate', 'Character clearance from previous institution or employer', 'open', '2025-10-28'),
+(2, 'Transcript of Records', 'Official transcript showing academic performance and grades', 'open', '2025-10-28'),
+(3, 'Birth Certificate', 'Certified copy of birth certificate (original or photocopy)', 'open', '2025-10-28'),
+(4, 'Medical Certificate', 'Health examination clearance from a licensed physician', 'open', '2025-10-30'),
+(5, 'Valid ID Submission', 'Any valid government-issued identification document', 'closed', '2025-09-30'),
+(6, 'Proof of Residency', 'Recent utility bill or lease agreement showing current address', 'open', '2025-11-15'),
+(7, 'NBI Clearance', 'National Bureau of Investigation clearance certificate', 'open', '2025-11-20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `requirements_compliance`
+--
+
+CREATE TABLE `requirements_compliance` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `requirement_id` bigint(20) UNSIGNED NOT NULL,
+  `member_id` bigint(20) UNSIGNED NOT NULL,
+  `compliance_status` enum('complied','not_complied','pending') NOT NULL DEFAULT 'pending',
+  `submitted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_requirement_id` (`requirement_id`),
+  KEY `idx_member_id` (`member_id`),
+  FOREIGN KEY (`requirement_id`) REFERENCES `requirements`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `requirements_compliance`
+--
+
+INSERT INTO `requirements_compliance` (`requirement_id`, `member_id`, `compliance_status`, `submitted_at`) VALUES
+(1, 1, 'complied', '2025-09-15 10:00:00'),
+(1, 2, 'complied', '2025-09-18 14:30:00'),
+(1, 3, 'not_complied', '2025-09-20 09:00:00'),
+(1, 4, 'pending', '2025-09-21 08:00:00'),
+(1, 5, 'complied', '2025-09-22 11:15:00'),
+(2, 1, 'complied', '2025-09-16 08:45:00'),
+(2, 2, 'pending', '2025-09-20 12:00:00'),
+(2, 3, 'complied', '2025-09-19 15:20:00'),
+(2, 4, 'complied', '2025-09-21 10:00:00'),
+(2, 5, 'not_complied', '2025-09-23 13:45:00'),
+(3, 1, 'pending', '2025-09-25 09:00:00'),
+(3, 2, 'complied', '2025-09-17 12:00:00'),
+(3, 3, 'complied', '2025-09-18 16:30:00'),
+(3, 4, 'not_complied', '2025-09-24 09:15:00'),
+(3, 5, 'complied', '2025-09-20 14:00:00'),
+(4, 1, 'complied', '2025-09-25 10:30:00'),
+(4, 2, 'complied', '2025-09-26 11:00:00'),
+(4, 3, 'pending', '2025-09-27 13:00:00'),
+(4, 4, 'complied', '2025-09-27 15:45:00'),
+(4, 5, 'pending', '2025-09-28 10:00:00'),
+(5, 1, 'complied', '2025-09-10 09:00:00'),
+(5, 2, 'complied', '2025-09-11 10:30:00'),
+(5, 3, 'complied', '2025-09-12 14:00:00'),
+(5, 4, 'complied', '2025-09-13 16:45:00'),
+(5, 5, 'complied', '2025-09-14 11:20:00');
+
+-- --------------------------------------------------------
+
 --
 -- Constraints for table `members`
 --

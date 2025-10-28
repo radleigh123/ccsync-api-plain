@@ -1,10 +1,11 @@
 <?php
 
 require_once __DIR__ . '/../config/database/db.php';
-// require __DIR__ . '/../vendor/autoload.php';  // Not needed - using native PHP/PDO only
 
 /**
- * Fetch all members with their associated programs
+ * Fetch all users (CCS Students)
+ * 
+ * Returns a count of all users with role='user' to represent total CCS students
  */
 
 header("Content-Type: application/json");
@@ -24,28 +25,44 @@ try {
     $limit = isset($_GET['limit']) ? min(100, max(1, intval($_GET['limit']))) : 20; // Max 100, default 20
     $offset = ($page - 1) * $limit;
 
-    // Get total count
-    $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM members");
+    // Get total count of users with role='user'
+    $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'user'");
     $countStmt->execute();
     $countResult = $countStmt->fetch(PDO::FETCH_ASSOC);
-    $totalMembers = $countResult['total'];
-    $totalPages = ceil($totalMembers / $limit);
+    $totalUsers = $countResult['total'];
+    $totalPages = ceil($totalUsers / $limit);
 
-    // Get paginated members
-    $stmt = $conn->prepare("SELECT m.*, p.name AS program_name FROM members m LEFT JOIN programs p ON m.program COLLATE utf8mb4_unicode_ci = p.code COLLATE utf8mb4_unicode_ci LIMIT :limit OFFSET :offset");
+    // Get paginated users
+    $stmt = $conn->prepare("
+        SELECT 
+            id,
+            name,
+            email,
+            email_verified_at,
+            id_school_number,
+            role,
+            created_at,
+            updated_at
+        FROM users 
+        WHERE role = 'user'
+        ORDER BY created_at DESC
+        LIMIT :limit OFFSET :offset
+    ");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
-    $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     http_response_code(200);
     echo json_encode([
         "success" => true,
-        "members" => $members,
+        "message" => "Users fetched successfully",
+        "users" => $users,
+        "totalCount" => $totalUsers,
         "pagination" => [
             "page" => $page,
             "limit" => $limit,
-            "total" => $totalMembers,
+            "total" => $totalUsers,
             "pages" => $totalPages,
             "hasNext" => $page < $totalPages,
             "hasPrev" => $page > 1
@@ -72,3 +89,4 @@ try {
 } finally {
     $conn = null;
 }
+?>
