@@ -72,12 +72,14 @@ try {
     ]);
 } catch (PDOException $e) {
     error_log("Query failed: " . $e->getMessage());
+    file_put_contents("debug.log", date('Y-m-d H:i:s') . " - Query failed: " . $e->getMessage() . "\n", FILE_APPEND);
     http_response_code(500);
     echo json_encode([
         "success" => false,
         "message" => "Internal server error"
     ]);
 } catch (Exception $e) {
+    error_log("Error failed: " . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,

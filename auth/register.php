@@ -164,8 +164,8 @@ try {
 
     // Insert new user in local database
     $stmt = $conn->prepare("
-        INSERT INTO users (name, email, firebase_uid, id_school_number, password, role) 
-        VALUES (:name, :email, :firebase_uid, :id_school_number, :password, :role)
+        INSERT INTO users (name, email, firebase_uid, id_school_number, password, role, created_at, updated_at) 
+        VALUES (:name, :email, :firebase_uid, :id_school_number, :password, :role, NOW(), NOW())
     ");
 
     $role = 'user'; // Default role
