@@ -1,27 +1,73 @@
 <?php
-
 require_once __DIR__ . '/../config/database/db.php';
 require __DIR__ . '/../vendor/autoload.php';
+
+try {
+    // Load environment variables
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+    $dotenv->load();
+} catch (\Exception $e) {
+    error_log("Error loading .env file: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server configuration error'
+    ]);
+    exit();
+}
 
 use Kreait\Firebase\Exception\Auth\FailedToVerifyToken;
 use Kreait\Firebase\Factory;
 
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Request-With");
+header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-$firebaseSecret = getenv('FIREBASE_SECRET');
+// Read input data ONCE
+$input = file_get_contents("php://input");
+$data = json_decode($input, true);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (empty($input)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'No input data provided'
+        ]);
+        exit();
+    }
+
+    if (!isset($data['id_token'])) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'ID token is required'
+        ]);
+        exit();
+    }
+}
+
+$firebaseSecret = $_ENV['FIREBASE_SECRET'] ?? null;
+if (!$firebaseSecret || !file_exists($firebaseSecret)) {
+    error_log("Firebase credentials file not found at: " . $firebaseSecret);
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Firebase configuration error'
+    ]);
+    exit();
+}
+
 $factory = (new Factory)->withServiceAccount($firebaseSecret);
 $auth = $factory->createAuth();
 
-$data = json_decode(file_get_contents("php://input"), true);
 $idToken = $data['id_token'] ?? '';
 
 try {
@@ -66,6 +112,8 @@ try {
     ]);
     exit();
 } catch (Exception $e) {
+    error_log("Unexpected error: " . $e->getMessage());
+    file_put_contents("debug.log", date('Y-m-d H:i:s') . " - Unexpected error: " . $e->getMessage() . "\n", FILE_APPEND);
     http_response_code(500);
     echo json_encode([
         'success' => false,
